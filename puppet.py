@@ -1,12 +1,12 @@
 from fabric.api import *
 
 # Restart puppet
-def restart_puppet():
+def puppet_restart():
     sudo('service puppet restart')
     #sudo('service puppet restart && tail -f /var/log/messages | { sed "/Finished catalog/ q" && kill $$ ;} | grep puppet-agent')
 
 # (Re-)install puppet, must be run on puppet server
-def install_puppet():
+def puppet_install():
 
     # get DNS domain to make FQDN
     dns_domain = local('hostname -d', capture=True).strip()
