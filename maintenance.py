@@ -50,6 +50,14 @@ def clean_rhn():
     sudo('yum install -y puppet')
     sudo('sudo /usr/sbin/rhnreg_ks  --serverUrl https://rhn1.cuny.edu/XMLRPC --activationkey 1-6008306d2fedb6b8010178b6fe89cb2d --force')
 
+def collect_files(file_match, local_dir='.', remote_dir='~', archive_cmd='tar -cjf', archive_ext='tar.bz2', archive_prefix='', archive_dir='/tmp', archive_delete=True):
+    host = env.host
+    archive_file = '{archive_dir}/{archive_prefix}{host}.{archive_ext}'.format(**locals())
+    with cd(remote_dir):
+        sudo('{archive_cmd} {archive_file} {file_match}'.format(**locals()))
+        get(archive_file, local_path=local_dir)
+        if archive_delete:
+            sudo('rm {archive_file}'.format(**locals()))
 
 def yum_update():
     pass
