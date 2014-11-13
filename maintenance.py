@@ -55,7 +55,7 @@ def collect_files(file_match, local_dir='.', remote_dir='~', archive_cmd='tar -c
     archive_file = '{archive_dir}/{archive_prefix}{host}.{archive_ext}'.format(**locals())
     with cd(remote_dir):
         sudo('{archive_cmd} {archive_file} {file_match}'.format(**locals()))
-        get(archive_file, local_path=local_dir)
+        get(archive_file, local_path=local_dir+'/')
         if archive_delete:
             sudo('rm {archive_file}'.format(**locals()))
 
