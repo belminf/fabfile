@@ -1,4 +1,7 @@
 from fabric.api import *
+from fabric.utils import *
+
+DNS_DOMAIN = local('hostname -d', capture=True).strip()
 
 # Restart puppet
 def puppet_restart():
@@ -9,12 +12,24 @@ def puppet_restart():
 def puppet_install():
 
     # get DNS domain to make FQDN
-    dns_domain = local('hostname -d', capture=True).strip()
-    fqdn = '.' in env.host and env.host or '{host}.{dns_domain}'.format(host=env.host, dns_domain=dns_domain)
+    fqdn = '.' in env.host and env.host or '{host}.{dns_domain}'.format(host=env.host, dns_domain=DNS_DOMAIN)
+
+    # get RHEL version
+    try:
+        if run('grep "release 5" /etc/redhat-release'):
+            epel_repo = 'http://dl.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm'
+        elif run ('grep "release 6" /etc/redhat-release'):
+            epel_repo = 'http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm'
+        else:
+            error('Not a supported RHEL-based OS')
+            return
+    except:
+        error('Not a RHEL-based OS')
+        return
 
     # install EPEL 
     sudo('rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL')
-    sudo('rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm || true')
+    sudo('rpm -Uvh {0} || true'.format(epel_repo))
 
     # install puppet
     sudo('yum install -y -q puppet')
