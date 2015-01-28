@@ -15,7 +15,7 @@ def puppet_install():
     fqdn = '.' in env.host and env.host or '{host}.{dns_domain}'.format(host=env.host, dns_domain=DNS_DOMAIN)
 
     # get RHEL version
-    try:
+    with settings(warn_only=True):
         if run('grep "release 5" /etc/redhat-release'):
             epel_repo = 'http://dl.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm'
         elif run ('grep "release 6" /etc/redhat-release'):
@@ -23,9 +23,6 @@ def puppet_install():
         else:
             error('Not a supported RHEL-based OS')
             return
-    except:
-        error('Not a RHEL-based OS')
-        return
 
     # install EPEL 
     sudo('rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL')
