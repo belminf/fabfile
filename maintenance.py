@@ -59,5 +59,6 @@ def collect_file(remote_file, local_dir='.'):
     get(remote_file, local_path=this_path+'/')
 
 
+@parallel
 def yum_update(packages):
     sudo('yum update -y -q {packages}'.format(**locals()))
