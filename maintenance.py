@@ -22,10 +22,6 @@ def uptime():
 def reboot_servers():
     reboot()
 
-def dns_fix():
-    run('cat /etc/resolv.conf')
-    sudo("sed -ibup 's/128.228.170.10/172.16.18.10/' /etc/resolv.conf")
-
 def restart_puppet():
     sudo('service puppet restart')
     #sudo('service puppet restart && tail -f /var/log/messages | { sed "/Finished catalog/ q" && kill $$ ;} | grep puppet-agent')
@@ -44,13 +40,8 @@ def clean_puppet():
     local('sudo puppet cert --sign {fqdn} --allow-dns-alt-names'.format(**locals()))
     sudo('/sbin/service puppet start')
 
-def clean_rhn():
-    sudo('rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL')
-    sudo('rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm')
-    sudo('yum install -y puppet')
-    sudo('sudo /usr/sbin/rhnreg_ks  --serverUrl https://rhn1.cuny.edu/XMLRPC --activationkey 1-6008306d2fedb6b8010178b6fe89cb2d --force')
 
-def collect_files(file_match, local_dir='.', remote_dir='~', archive_cmd='tar -cjf', archive_ext='tar.bz2', archive_prefix='', archive_dir='/tmp', archive_delete=True):
+def collect_file_archives(file_match, local_dir='.', remote_dir='~', archive_cmd='tar -cjf', archive_ext='tar.bz2', archive_prefix='', archive_dir='/tmp', archive_delete=True):
     host = env.host
     archive_file = '{archive_dir}/{archive_prefix}{host}.{archive_ext}'.format(**locals())
     with cd(remote_dir):
@@ -59,5 +50,14 @@ def collect_files(file_match, local_dir='.', remote_dir='~', archive_cmd='tar -c
         if archive_delete:
             sudo('rm {archive_file}'.format(**locals()))
 
-def yum_update():
-    pass
+def collect_file(remote_file, local_dir='.'):
+    # TODO: slugify hostname
+    import os.path
+    host = env.host
+    this_path = os.path.join(local_dir,env.host)
+    local('mkdir {0} || true'.format(this_path))
+    get(remote_file, local_path=this_path+'/')
+
+
+def yum_update(packages):
+    sudo('yum update -y -q {packages}'.format(**locals()))
