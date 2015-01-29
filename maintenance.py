@@ -11,8 +11,11 @@ def get_hash(user=env.user):
         print(sudo('grep {user} /etc/shadow | cut -d\':\' -f 2'.format(**locals())))
 
 def up():
-    with settings(hide('everything'), warn_only=True):
-        run('uptime')
+    with settings(hide('everything'), warn_only=True, abort_on_prompts=True):
+        try:
+            run('uptime')
+        except:
+            pass
 
 @parallel
 def uptime():
@@ -59,6 +62,5 @@ def collect_file(remote_file, local_dir='.'):
     get(remote_file, local_path=this_path+'/')
 
 
-@parallel
 def yum_update(packages):
     sudo('yum update -y -q {packages}'.format(**locals()))
