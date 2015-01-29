@@ -11,7 +11,8 @@ def rhn_check():
     elif results.return_code == 2:
         puts('RHNCHECK: Not registered')
 
-def rhn_register(key, server=None, server_path='/XMLRPC', force=True):
+def rhn_register(key=None, server=None, server_path='/XMLRPC', force=True):
     server_param = server and ' --serverUrl https://{0}{1}'.format(server, server_path) or ''
     force_param = force and ' --force' or ''
-    sudo('/usr/sbin/rhnreg_ks --activationkey {0}{1}{2}'.format(key, server_param, force_param))
+    key_param = key and ' --activationkey {0}'.format(key) or ''
+    sudo('/usr/sbin/rhnreg_ks{0}{1}{2}'.format(key_param, server_param, force_param))
