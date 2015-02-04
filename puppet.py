@@ -4,8 +4,8 @@ from fabric.utils import *
 DNS_DOMAIN = local('hostname -d', capture=True).strip()
 
 # Restart puppet
-def puppet_restart():
-    sudo('service puppet restart')
+def puppet_run():
+    sudo('service puppet stop; puppet agent --onetime --no-daemonize; service puppet start')
     #sudo('service puppet restart && tail -f /var/log/messages | { sed "/Finished catalog/ q" && kill $$ ;} | grep puppet-agent')
 
 # (Re-)install puppet, must be run on puppet server
