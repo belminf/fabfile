@@ -11,8 +11,12 @@ def rhn_check():
     elif results.return_code == 2:
         puts('RHNCHECK: Not registered')
 
-def rhn_register(key=None, server=None, server_path='/XMLRPC', force=True):
-    server_param = server and ' --serverUrl https://{0}{1}'.format(server, server_path) or ''
+def rhn_register(rhn_server, key=None, cert_version='1.0-1', server_path='/XMLRPC', force=True):
+    try:
+        sudo('rpm -Uvh http://{rhn_server}/pub/rhn-org-trusted-ssl-cert-{cert_version}.noarch.rpm'.format(**locals()))
+    except:
+        pass
+    server_param = rhn_server and ' --serverUrl http://{0}{1}'.format(rhn_server, server_path) or ''
     force_param = force and ' --force' or ''
     key_param = key and ' --activationkey {0}'.format(key) or ''
     sudo('/usr/sbin/rhnreg_ks{0}{1}{2}'.format(key_param, server_param, force_param))
