@@ -1,10 +1,7 @@
 from __future__ import with_statement
 from fabric.api import *
 #from fabric.operations import *
-
-def read_hosts():
-    import sys
-    env.hosts = [ h.strip() for h in sys.stdin.readlines() if h.strip() and not h.strip().startswith(('#','/')) ]
+from fabric.utils import *
 
 def get_hash(user=env.user):
     with hide('everything'):
@@ -17,9 +14,11 @@ def up():
         except:
             pass
 
-@parallel
 def uptime():
+    try:
         run('uptime')
+    except Exception, e:
+        warn(e)
 
 @parallel
 def reboot_servers():
@@ -66,3 +65,12 @@ def rpm_lookup(package):
     
 def yum_update(packages):
     sudo('yum update -y -q {packages}'.format(**locals()))
+
+def yum_clean():
+    sudo('yum clean all')
+
+def up2date_update(packages):
+    sudo('up2date -u {packages}'.format(**locals()))
+
+def rpm_fixed(package, cve):
+    sudo('rpm -q --changelog {package} | grep -q {cve} && echo fixed || echo VULNERABLE!'.format(**locals()))
