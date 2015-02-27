@@ -9,10 +9,11 @@ def puppet_run():
     #sudo('service puppet restart && tail -f /var/log/messages | { sed "/Finished catalog/ q" && kill $$ ;} | grep puppet-agent')
 
 # (Re-)install puppet, must be run on puppet server
-def puppet_install():
+def puppet_install(fqdn=None, force_pluginsync=True):
 
     # get DNS domain to make FQDN
-    fqdn = '.' in env.host and env.host or '{host}.{dns_domain}'.format(host=env.host, dns_domain=DNS_DOMAIN)
+    if not fqdn:
+        fqdn = '.' in env.host and env.host or '{host}.{dns_domain}'.format(host=env.host, dns_domain=DNS_DOMAIN)
 
     # get RHEL version
     with settings(warn_only=True):
@@ -43,6 +44,10 @@ def puppet_install():
     # remove old certificates and re-run puppet to create new cert
     sudo('rm -rf /var/lib/puppet/ssl')
     sudo('puppet agent -t --report --pluginsync || true')
+
+    # plugin sync force
+    if force_pluginsync:
+        sudo("grep 'pluginsync = true' /etc/puppet/puppet.conf || sed -i'' 's/.*pluginsync.*//' /etc/puppet/puppet.conf; sed -i'' 's/\[main\]/\[main\]\\n    pluginsync = true/' /etc/puppet/puppet.conf")
 
     # sign certificate on server
     local('sudo puppet cert --sign {fqdn} --allow-dns-alt-names'.format(**locals()))
