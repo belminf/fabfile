@@ -11,6 +11,9 @@ def puppet_run():
 # (Re-)install puppet, must be run on puppet server
 def puppet_install(fqdn=None, force_pluginsync=True):
 
+    # if we have puppet, stop it
+    sudo('/sbin/service puppet stop || true')
+
     # get DNS domain to make FQDN
     if not fqdn:
         fqdn = '.' in env.host and env.host or '{host}.{dns_domain}'.format(host=env.host, dns_domain=DNS_DOMAIN)
@@ -37,9 +40,6 @@ def puppet_install(fqdn=None, force_pluginsync=True):
 
     # make sure time is synchronized
     sudo('/usr/sbin/ntpd -q -g')
-
-    # stop puppet service if running
-    sudo('/sbin/service puppet stop')
 
     # remove old certificates and re-run puppet to create new cert
     sudo('rm -rf /var/lib/puppet/ssl')
