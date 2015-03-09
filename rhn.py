@@ -13,7 +13,7 @@ def rhn_check():
 
 def rhn_register(rhn_server, key=None, cert_version='1.0-1', server_path='/XMLRPC', force=True):
     try:
-        sudo('rpm -Uvh http://{rhn_server}/pub/rhn-org-trusted-ssl-cert-{cert_version}.noarch.rpm'.format(**locals()))
+        sudo('rpm -Uvh http://{rhn_server}/pub/rhn-org-trusted-ssl-cert-{cert_version}.noarch.rpm || true'.format(**locals()))
     except:
         pass
     server_param = rhn_server and ' --serverUrl http://{0}{1}'.format(rhn_server, server_path) or ''
