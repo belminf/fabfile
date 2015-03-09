@@ -3,6 +3,8 @@ from fabric.api import *
 #from fabric.operations import *
 from fabric.utils import *
 
+DNS_DOMAIN = local('hostname -d', capture=True).strip()
+
 def get_hash(user=env.user):
     with hide('everything'):
         print(sudo('grep {user} /etc/shadow | cut -d\':\' -f 2'.format(**locals())))
@@ -23,25 +25,6 @@ def uptime():
 @parallel
 def reboot_servers():
     reboot()
-
-def restart_puppet():
-    sudo('service puppet restart')
-    #sudo('service puppet restart && tail -f /var/log/messages | { sed "/Finished catalog/ q" && kill $$ ;} | grep puppet-agent')
-
-def clean_puppet():
-    dns_domain = local('hostname -d', capture=True).strip()
-    fqdn = '.' in env.host and env.host or '{host}.{dns_domain}'.format(host=env.host, dns_domain=dns_domain)
-    sudo('rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL')
-    sudo('rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm || true')
-    sudo('yum install -y -q puppet')
-    local('sudo puppet cert clean {fqdn} || true'.format(**locals()))
-    sudo('/usr/sbin/ntpd -q -g')
-    sudo('/sbin/service puppet stop')
-    sudo('rm -rf /var/lib/puppet/ssl')
-    sudo('puppet agent -t --report --pluginsync || true')
-    local('sudo puppet cert --sign {fqdn} --allow-dns-alt-names'.format(**locals()))
-    sudo('/sbin/service puppet start')
-
 
 def collect_file_archives(file_match, local_dir='.', remote_dir='~', archive_cmd='tar -cjf', archive_ext='tar.bz2', archive_prefix='', archive_dir='/tmp', archive_delete=True):
     host = env.host
@@ -74,3 +57,10 @@ def up2date_update(packages):
 
 def rpm_fixed(package, cve):
     sudo('rpm -q --changelog {package} | grep -q {cve} && echo fixed || echo VULNERABLE!'.format(**locals()))
+
+def fix_hostname(fqdn=None):
+    if not fqdn:
+        fqdn = '.' in env.host and env.host or '{host}.{dns_domain}'.format(host=env.host, dns_domain=DNS_DOMAIN)
+    sudo('hostname {fqdn}'.format(**locals()))
+
+
