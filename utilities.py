@@ -6,3 +6,6 @@ def read_hosts():
 
 def sudo_cmd(command):
     sudo(command)
+
+def sudo_check(user):
+    sudo('sudo -l -U {user}'.format(**locals()))
