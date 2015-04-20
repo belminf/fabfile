@@ -46,8 +46,11 @@ def collect_file(remote_file, local_dir='.'):
 def rpm_lookup(package):
     run('rpm -q --queryformat \'v%{{VERSION}} (Release: %{{RELEASE}}, Arch: %{{ARCH}})\n\' {0}'.format(package))
     
-def yum_update(packages):
-    sudo('yum update -y -q {packages}'.format(**locals()))
+def yum_update(packages=None):
+    if packages:
+        sudo('yum update -y -q {packages}'.format(**locals()))
+    else:
+        sudo('yum update -y')
 
 def yum_clean():
     sudo('yum clean all')
@@ -64,3 +67,8 @@ def fix_hostname(fqdn=None):
     sudo('hostname {fqdn}'.format(**locals()))
 
 
+def add_static_host(host, ip):
+    with settings(warn_only=True):
+        host_exists = run('egrep "{ip}[[:blank:]]+{host}$" /etc/hosts'.format(**locals()))
+        if not host_exists:
+            sudo('echo "{ip}\t{host}" | tee -a /etc/hosts 2> /dev/null'.format(**locals()))
