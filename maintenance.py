@@ -75,7 +75,7 @@ def add_static_host(host, ip):
 
 def set_dns_search(domains):
     # Remove current search first
-    sudo('sed -i"" "/search[[:blank:]]/d" /etc/resolv.conf'.format(**locals()))
+    sudo('sed -i"" "/search[[:blank:]]/d" /etc/resolv.conf')
 
     # Add search
     sudo('echo "search\t{domains}" | tee -a /etc/resolv.conf 2> /dev/null'.format(**locals()))
