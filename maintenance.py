@@ -72,3 +72,10 @@ def add_static_host(host, ip):
         host_exists = run('egrep "{ip}[[:blank:]]+{host}$" /etc/hosts'.format(**locals()))
         if not host_exists:
             sudo('echo "{ip}\t{host}" | tee -a /etc/hosts 2> /dev/null'.format(**locals()))
+
+def set_dns_search(domains):
+    # Remove current search first
+    sudo('sed -i"" "/search[[:blank:]]/d" /etc/resolv.conf'.format(**locals()))
+
+    # Add search
+    sudo('echo "search\t{domains}" | tee -a /etc/resolv.conf 2> /dev/null'.format(**locals()))
