@@ -1,12 +1,47 @@
 from fabric.api import *
 from fabric.utils import *
+from time import sleep
+from distutils.util import strtobool
 
 DNS_DOMAIN = local('hostname -d', capture=True).strip()
 
 # Restart puppet
 def puppet_run():
-    sudo('service puppet stop; puppet agent --onetime --no-daemonize; service puppet start')
+    sudo('service puppet stop; puppet agent --onetime --verbose --no-daemonize; service puppet start')
     #sudo('service puppet restart && tail -f /var/log/messages | { sed "/Finished catalog/ q" && kill $$ ;} | grep puppet-agent')
+
+
+# Puppet cert clean
+def puppet_cert_clean(puppet_local="True"):
+
+    # Boolean
+    puppet_local = strtobool(puppet_local)
+
+    # get fqdn
+    fqdn = '.' in env.host and env.host or '{host}.{dns_domain}'.format(host=env.host, dns_domain=DNS_DOMAIN)
+
+    # if we have puppet, stop it
+    sudo('/sbin/service puppet stop || true')
+
+    # clean certificate locally
+    if puppet_local:
+        local('sudo puppet cert clean {fqdn} || true'.format(**locals()))
+
+    # make sure time is synchronized
+    sudo('/usr/sbin/ntpd -q -g')
+
+    # remove old certificates and re-run puppet to create new cert
+    sudo('rm -rf /var/lib/puppet/ssl')
+    sudo('/sbin/service puppet start')
+    sleep(5)
+
+    # sign certificate on server
+    if puppet_local:
+        local('sudo puppet cert --sign {fqdn} --allow-dns-alt-names'.format(**locals()))
+
+    # finally, re-start puppet
+    sudo('/sbin/service puppet restart')
+    
 
 # (Re-)install puppet, must be run on puppet server
 def puppet_install(fqdn=None, force_pluginsync=True):
