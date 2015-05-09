@@ -82,7 +82,7 @@ def puppet_install(fqdn=None, force_pluginsync=True):
 
     # plugin sync force
     if force_pluginsync:
-        sudo("grep 'pluginsync = true' /etc/puppet/puppet.conf || sed -i'' 's/.*pluginsync.*//' /etc/puppet/puppet.conf; sed -i'' 's/\[main\]/\[main\]\\n    pluginsync = true/' /etc/puppet/puppet.conf")
+        sudo("grep 'pluginsync = true' /etc/puppet/puppet.conf > /dev/null || ( sed -i'' 's/.*pluginsync.*//' /etc/puppet/puppet.conf; sed -i'' 's/\[agent\]/\[agent\]\\n    pluginsync = true/' /etc/puppet/puppet.conf; )")
 
     # sign certificate on server
     local('sudo puppet cert --sign {fqdn} --allow-dns-alt-names'.format(**locals()))
