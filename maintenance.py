@@ -22,8 +22,8 @@ def uptime():
     except Exception, e:
         warn(e)
 
-@parallel
 def reboot_servers():
+    run('date')
     reboot()
 
 def collect_file_archives(file_match, local_dir='.', remote_dir='~', archive_cmd='tar -cjf', archive_ext='tar.bz2', archive_prefix='', archive_dir='/tmp', archive_delete=True):
