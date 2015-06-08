@@ -42,6 +42,15 @@ def puppet_cert_clean(puppet_local="True"):
     # finally, re-start puppet
     sudo('/sbin/service puppet restart')
     
+# Turn on plugin sync
+def puppet_pluginsync():
+
+    # check if pluginsync is on already, if not turn it on
+    sudo("grep 'pluginsync = true' /etc/puppet/puppet.conf || sed -i'' 's/.*pluginsync.*//' /etc/puppet/puppet.conf; sed -i'' 's/\[main\]/\[main\]\\n    pluginsync = true/' /etc/puppet/puppet.conf")
+
+    # finally, re-start puppet
+    sudo('/sbin/service puppet restart')
+
 
 # (Re-)install puppet, must be run on puppet server
 def puppet_install(fqdn=None, force_pluginsync=True):
@@ -63,7 +72,7 @@ def puppet_install(fqdn=None, force_pluginsync=True):
             error('Not a supported RHEL-based OS')
             return
 
-    # install EPEL 
+    # install EPEL
     sudo('rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL')
     sudo('rpm -Uvh {0} || true'.format(epel_repo))
 
