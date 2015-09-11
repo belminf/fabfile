@@ -37,7 +37,7 @@ def puppet_cert_clean(puppet_local="True"):
 
     # sign certificate on server
     if puppet_local:
-        local('sudo puppet cert --sign {fqdn} --allow-dns-alt-names'.format(**locals()))
+        local('sudo puppet cert --sign {fqdn} --allow-dns-alt-names || true'.format(**locals()))
 
     # finally, re-start puppet
     sudo('/sbin/service puppet restart')
@@ -46,7 +46,7 @@ def puppet_cert_clean(puppet_local="True"):
 def puppet_pluginsync():
 
     # check if pluginsync is on already, if not turn it on
-    sudo("grep 'pluginsync = true' /etc/puppet/puppet.conf || sed -i'' 's/.*pluginsync.*//' /etc/puppet/puppet.conf; sed -i'' 's/\[main\]/\[main\]\\n    pluginsync = true/' /etc/puppet/puppet.conf")
+    sudo("grep 'pluginsync = true' /etc/puppet/puppet.conf || sed -i'' 's/.*pluginsync.*//' /etc/puppet/puppet.conf; sed -i'' 's/\[main\]/\[main\]\\n    pluginsync = true/' /etc/puppet/puppet.conf || true")
 
     # finally, re-start puppet
     sudo('/sbin/service puppet restart')
