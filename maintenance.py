@@ -65,6 +65,7 @@ def fix_hostname(fqdn=None):
     if not fqdn:
         fqdn = '.' in env.host and env.host or '{host}.{dns_domain}'.format(host=env.host, dns_domain=DNS_DOMAIN)
     sudo('hostname {fqdn}'.format(**locals()))
+    sudo('sed -i"" "s/HOSTNAME=.*/HOSTNAME={fqdn}/" /etc/sysconfig/network'.format(**locals()))
 
 
 def add_static_host(host, ip):
