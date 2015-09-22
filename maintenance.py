@@ -61,11 +61,21 @@ def up2date_update(packages):
 def rpm_fixed(package, cve):
     sudo('rpm -q --changelog {package} | grep -q {cve} && echo fixed || echo VULNERABLE!'.format(**locals()))
 
-def fix_hostname(fqdn=None):
-    if not fqdn:
-        fqdn = '.' in env.host and env.host or '{host}.{dns_domain}'.format(host=env.host, dns_domain=DNS_DOMAIN)
-    sudo('hostname {fqdn}'.format(**locals()))
-    sudo('sed -i"" "s/HOSTNAME=.*/HOSTNAME={fqdn}/" /etc/sysconfig/network'.format(**locals()))
+def fix_hostname(fqdn=None, use_env=None):
+    if use_env:
+        this_host = env.host
+    else:
+        this_host = run('hostname')
+
+    if not this_host:
+        warn('Could not determine a hostname')
+    else:
+        if not fqdn:
+            fqdn = '.' in this_host and this_host or '{host}.{dns_domain}'.format(host=this_host, dns_domain=DNS_DOMAIN)
+        sudo('hostname {fqdn}'.format(**locals()))
+        sudo('sed -i"" "s/HOSTNAME=.*/HOSTNAME={fqdn}/" /etc/sysconfig/network'.format(**locals()))
+        sudo('/sbin/sysctl kernel.hostname={fqdn}'.format(**locals()))
+        sudo('sed -i"" "/kernel.hostname \=/d" /etc/sysctl.conf')
 
 
 def add_static_host(host, ip):
