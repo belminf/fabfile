@@ -28,7 +28,7 @@ def puppet_cert_clean(puppet_local="True"):
         local('sudo puppet cert clean {fqdn} || true'.format(**locals()))
 
     # make sure time is synchronized
-    sudo('/usr/sbin/ntpd -q -g')
+    sudo('/usr/sbin/ntpd -q -g || true')
 
     # remove old certificates and re-run puppet to create new cert
     sudo('rm -rf /var/lib/puppet/ssl')
@@ -83,7 +83,7 @@ def puppet_install(fqdn=None, force_pluginsync=True):
     local('sudo puppet cert clean {fqdn} || true'.format(**locals()))
 
     # make sure time is synchronized
-    sudo('/usr/sbin/ntpd -q -g')
+    sudo('/usr/sbin/ntpd -q -g || true')
 
     # remove old certificates and re-run puppet to create new cert
     sudo('rm -rf /var/lib/puppet/ssl')
